@@ -1,9 +1,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Animated, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useFadeIn } from '@/hooks/use-fade-in';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { getEntryById, type JournalEntry } from '@/lib/journal-storage';
 
 export default function EntryDetailScreen() {
@@ -11,6 +14,16 @@ export default function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<JournalEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const tintColor = useThemeColor({}, 'tint');
+  const fadeIn = useFadeIn();
+  const triggerHaptic = useCallback(async () => {
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {
+      // no-op
+    }
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -21,10 +34,19 @@ export default function EntryDetailScreen() {
         return;
       }
 
-      const storedEntry = await getEntryById(id);
-      if (isActive) {
-        setEntry(storedEntry);
-        setIsLoading(false);
+      try {
+        const storedEntry = await getEntryById(id);
+        if (isActive) {
+          setEntry(storedEntry);
+        }
+      } catch (error) {
+        if (isActive) {
+          setLoadError('Unable to load this entry.');
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -44,52 +66,101 @@ export default function EntryDetailScreen() {
     });
 
   return (
-    <ThemedView style={styles.container}>
-      <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <ThemedText type="defaultSemiBold">Back</ThemedText>
-      </Pressable>
-      {isLoading ? (
-        <ThemedText style={styles.subtitle}>Loading entry...</ThemedText>
-      ) : entry ? (
-        <>
-          <ThemedText type="title">{dateLabel}</ThemedText>
-          <ThemedText style={styles.prompt}>{entry.prompt}</ThemedText>
-          <ThemedText style={styles.content}>{entry.content}</ThemedText>
-        </>
-      ) : (
-        <>
-          <ThemedText type="title">Entry not found</ThemedText>
-          <ThemedText style={styles.subtitle}>
-            This entry may have been removed or is unavailable.
-          </ThemedText>
-        </>
-      )}
-    </ThemedView>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Animated.View style={[styles.content, { opacity: fadeIn.opacity }]}>
+        <Pressable
+          style={({ pressed }) => [styles.backButton, pressed && styles.pressablePressed]}
+          onPress={async () => {
+            await triggerHaptic();
+            router.back();
+          }}>
+          <ThemedText type="defaultSemiBold">Back</ThemedText>
+        </Pressable>
+        {isLoading ? (
+          <ThemedView style={styles.centeredState}>
+            <ActivityIndicator color="#000000" />
+          </ThemedView>
+        ) : loadError ? (
+          <ThemedText style={styles.errorText}>{loadError}</ThemedText>
+        ) : entry ? (
+          <>
+            <ThemedText type="title">{dateLabel}</ThemedText>
+            <ThemedView style={[styles.entryCard, styles.cardShadow]}>
+              <ThemedText style={styles.prompt}>{entry.prompt}</ThemedText>
+              <ThemedText style={styles.entryContent}>{entry.content}</ThemedText>
+            </ThemedView>
+          </>
+        ) : (
+          <>
+            <ThemedText type="title">Entry not found</ThemedText>
+            <ThemedText style={styles.subtitle}>
+              This entry may have been removed or is unavailable.
+            </ThemedText>
+          </>
+        )}
+      </Animated.View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 24,
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#F5F5F5',
+  },
+  content: {
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
     gap: 16,
   },
   backButton: {
     alignSelf: 'flex-start',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(120,120,120,0.2)',
+    borderColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF',
+    minHeight: 44,
+    justifyContent: 'center',
   },
   subtitle: {
-    opacity: 0.7,
+    color: '#666666',
   },
   prompt: {
-    opacity: 0.8,
+    color: '#666666',
   },
-  content: {
+  entryCard: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF',
+    gap: 8,
+  },
+  entryContent: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  centeredState: {
+    minHeight: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    color: '#d14343',
+  },
+  pressablePressed: {
+    transform: [{ scale: 0.98 }],
+    opacity: 0.9,
+  },
+  cardShadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 });

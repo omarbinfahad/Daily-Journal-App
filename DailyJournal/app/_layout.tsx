@@ -1,4 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +30,25 @@ export default function RootLayout() {
     loadPin();
   }, []);
 
+  useEffect(() => {
+    if (Constants.appOwnership === 'expo') {
+      return;
+    }
+    const registerHandler = async () => {
+      const notifications = await import('expo-notifications');
+      notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+        }),
+      });
+    };
+    registerHandler();
+  }, []);
+
   if (!isReady) {
     return null;
   }
@@ -38,7 +58,7 @@ export default function RootLayout() {
       {storedPin && !isUnlocked ? (
         <PinLock pin={storedPin} onUnlock={() => setIsUnlocked(true)} />
       ) : (
-        <Stack>
+        <Stack screenOptions={{ animation: 'fade' }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="entry/[id]" options={{ title: 'Entry' }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
