@@ -289,7 +289,7 @@ export default function WriteEntryScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.container, { paddingBottom: 120 }]}
         keyboardShouldPersistTaps="handled">
         <Animated.View style={[styles.content, { opacity: fadeIn.opacity }]}>
           <ThemedView style={styles.titleRow}>
@@ -409,6 +409,7 @@ export default function WriteEntryScreen() {
               <Pressable
                 style={({ pressed }) => [
                   styles.secondaryButton,
+                  isNarrow && styles.secondaryButtonCompact,
                   pressed && styles.pressablePressed,
                 ]}
                 onPress={async () => {
@@ -416,13 +417,17 @@ export default function WriteEntryScreen() {
                   handleAddPhoto();
                 }}>
                 <IconSymbol size={18} name="plus" color="#000000" />
-                <ThemedText type="defaultSemiBold" style={styles.secondaryButtonText}>
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={styles.secondaryButtonText}
+                  numberOfLines={1}>
                   Add Photo
                 </ThemedText>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
                   styles.secondaryButton,
+                  isNarrow && styles.secondaryButtonCompact,
                   pressed && styles.pressablePressed,
                 ]}
                 onPress={async () => {
@@ -430,7 +435,10 @@ export default function WriteEntryScreen() {
                   handleTakePhoto();
                 }}>
                 <IconSymbol size={18} name="camera" color="#000000" />
-                <ThemedText type="defaultSemiBold" style={styles.secondaryButtonText}>
+                <ThemedText
+                  type="defaultSemiBold"
+                  style={styles.secondaryButtonText}
+                  numberOfLines={1}>
                   Take Photo
                 </ThemedText>
               </Pressable>
@@ -484,7 +492,7 @@ export default function WriteEntryScreen() {
         </ThemedView>
       </Animated.View>
       </ScrollView>
-      <ThemedView style={styles.bottomBar}>
+      <ThemedView style={[styles.bottomBar, { bottom: 24 }]}>
         <Pressable
           style={({ pressed }) => [
             styles.saveFab,
@@ -664,6 +672,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     flex: 1,
+    flexWrap: 'wrap',
   },
   secondaryButton: {
     borderRadius: 999,
@@ -678,6 +687,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E0E0E0',
+  },
+  secondaryButtonCompact: {
+    flexBasis: '48%',
+    minWidth: 120,
   },
   photoWrapper: {
     width: '100%',
@@ -782,6 +795,7 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     color: '#000000',
+    flexShrink: 1,
   },
   suggestionText: {
     color: '#000000',

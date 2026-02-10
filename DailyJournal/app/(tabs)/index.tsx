@@ -155,10 +155,16 @@ export default function HomeScreen() {
     }
   }, []);
 
+  // Tab bar clearance only; root SafeAreaView already applies bottom safe area
+  const bottomPadding = 88;
+
   return (
     <ThemedView style={[styles.screen, { backgroundColor }]}>
       <ScrollView
-        contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}
+        contentContainerStyle={[
+          styles.container,
+          { paddingHorizontal: horizontalPadding, paddingBottom: bottomPadding },
+        ]}
         keyboardShouldPersistTaps="handled">
         <Animated.View style={[styles.content, { opacity: fadeIn.opacity }]}>
           <ThemedView style={styles.topSection}>
@@ -384,7 +390,7 @@ const styles = StyleSheet.create({
   },
   streakNumber: {
     fontSize: 48,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#000000',
   },
   streakUnit: {

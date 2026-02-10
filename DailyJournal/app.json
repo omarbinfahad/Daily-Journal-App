@@ -22,6 +22,14 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ]
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c587116a-42cd-401f-a367-9e57345e4298"
+      }
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker"
+    ]
   }
 }

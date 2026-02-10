@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import PinLock from '@/components/pin-lock';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -54,17 +55,21 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {storedPin && !isUnlocked ? (
-        <PinLock pin={storedPin} onUnlock={() => setIsUnlocked(true)} />
-      ) : (
-        <Stack screenOptions={{ animation: 'fade' }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="entry/[id]" options={{ title: 'Entry' }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-      )}
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
+          {storedPin && !isUnlocked ? (
+            <PinLock pin={storedPin} onUnlock={() => setIsUnlocked(true)} />
+          ) : (
+            <Stack screenOptions={{ animation: 'fade' }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="entry/[id]" options={{ title: 'Entry' }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            </Stack>
+          )}
+        </SafeAreaView>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
