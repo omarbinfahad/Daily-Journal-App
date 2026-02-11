@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "LingoSwipe",
+    "slug": "lingoswipe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lingoswipe.app",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.lingoswipe.app",
+      "versionCode": 1,
+      "permissions": [],
+      "blockedPermissions": [
+        "CAMERA",
+        "RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": false
+        }
+      ],
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}
